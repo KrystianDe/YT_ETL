@@ -1,5 +1,7 @@
 import requests
 import json
+from datetime import date 
+
 import os
 from dotenv import load_dotenv
 
@@ -79,7 +81,7 @@ def batch_list(video_id_list, batch_size):
 
 def extract_video_data(video_ids):
 
-    extracted_list = []
+    extracted_data = []
 
     def batch_list(video_id_list, batch_size):
         for video_id in range(0, len(video_id_list), batch_size):
@@ -115,15 +117,23 @@ def extract_video_data(video_ids):
                     "commentcount": statistics.get('commentCount', None),
                 }
 
-            extracted_list.append(video_data)
+            extracted_data.append(video_data)
         
-        return extracted_list
+        return extracted_data
 
     except requests.exceptions.RequestException as e:
         raise e
 
 
+def save_to_json(extracted_data):
+    file_path = f"./data/YT_data_{date.today()}.json"
+
+    with open(file_path, "w", encoding="utf-8") as json_outfile:
+        json.dump(extracted_data, json_outfile, indent=4, ensure_ascii=False)
+
+
 if __name__ == "__main__":
     playlistId = get_playlist_id()
     video_ids = get_video_id(playlistId)
-    extract_video_data(video_ids)
+    video_data = extract_video_data(video_ids)
+    save_to_json(video_data)
